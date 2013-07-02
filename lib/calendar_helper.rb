@@ -152,9 +152,66 @@ module CalendarHelper
     begin_of_week = beginning_of_week(first, first_weekday)
     cal << %(<td class="#{options[:week_number_class]}">#{week_number(begin_of_week, options[:week_number_format])}</td>) if options[:show_week_numbers]
 
-    begin_of_week.upto(first - 1) do |d|
-      cal << generate_other_month_cell(d, options)
+    # New things added by Alan #################################################
+    #
+    # Make two weeks previous to today's date be shown
+    # previous_week gets the beginning of the week of two weeks ago
+    previous_week = beginning_of_week(Date.today - 2.weeks, first_weekday)
+
+    # For the previous two weeks up to two days before the first day of the
+    # month, generate the cells.
+    previous_week.upto(first - 2) do |cur|
+      # cal << generate_other_month_cell(d, options)
+      cell_text, cell_attrs = block.call(cur)
+      cell_text ||= cur.mday
+      cel_attrs ||= {}
+      cell_attrs["data-date"] = cur
+      cell_attrs[:headers] = th_id(cur, options[:table_id])
+      cell_attrs[:class] ||= options[:day_class]
+      cell_attrs[:class] += " weekendDay" if [0, 6].include?(cur.wday)
+      today = (Time.respond_to?(:zone) && !(zone = Time.zone).nil? ? zone.now.to_date : Date.today)
+      cell_attrs[:class] += " today" if (cur == today) and options[:show_today]
+
+      cal << generate_cell(cell_text, cell_attrs)
+
+      if cur.wday == last_weekday
+        cal << %(</tr>)
+        if cur != last
+          cal << %(<tr>)
+          cal << %(<td class="#{options[:week_number_class]}">#{week_number(cur + 1, options[:week_number_format])}</td>) if options[:show_week_numbers]
+        end
+      end
+
+    end unless Date.today.wday == first_weekday
+
+    cal << %(</tr><tr>)
+
+    # This begins the normal calendar view, but was changed to use create
+    # attributes instead of dimming them.
+    begin_of_week.upto(first - 1) do |cur|
+      # cal << generate_other_month_cell(d, options)
+      cell_text, cell_attrs = block.call(cur)
+      cell_text ||= cur.mday
+      cel_attrs ||= {}
+      cell_attrs["data-date"] = cur
+      cell_attrs[:headers] = th_id(cur, options[:table_id])
+      cell_attrs[:class] ||= options[:day_class]
+      cell_attrs[:class] += " weekendDay" if [0, 6].include?(cur.wday)
+      today = (Time.respond_to?(:zone) && !(zone = Time.zone).nil? ? zone.now.to_date : Date.today)
+      cell_attrs[:class] += " today" if (cur == today) and options[:show_today]
+
+      cal << generate_cell(cell_text, cell_attrs)
+
+      if cur.wday == last_weekday
+        cal << %(</tr>)
+        if cur != last
+          cal << %(<tr>)
+          cal << %(<td class="#{options[:week_number_class]}">#{week_number(cur + 1, options[:week_number_format])}</td>) if options[:show_week_numbers]
+        end
+      end
+
     end unless first.wday == first_weekday
+    # End of things that Alan added or changed #################################
 
     first.upto(last) do |cur|
       cell_text, cell_attrs = block.call(cur)
