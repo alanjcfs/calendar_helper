@@ -120,7 +120,7 @@ module CalendarHelper
     end
 
     # TODO Use some kind of builder instead of straight HTML
-    cal = %(<table id="#{options[:table_id]}" class="#{options[:table_class]}" summary="#{options[:summary]}">)
+    cal = %(<table id="#{options[:table_id]}" class="#{options[:table_class]}" border=1 summary="#{options[:summary]}">)
     cal << %(<thead>)
 
     if (options[:month_header])
