@@ -102,7 +102,8 @@ module CalendarHelper
       :week_number_class   => 'weekNumber',
       :week_number_title   => 'CW',
       :week_number_format  => :iso8601, # :iso8601 or :us_canada,
-      :show_other_months   => true
+      :show_other_months   => true,
+      :show_month_name     => true,
     }
     options = defaults.merge options
 
@@ -123,14 +124,17 @@ module CalendarHelper
     cal = %(<table id="#{options[:table_id]}" class="#{options[:table_class]}" border=1 summary="#{options[:summary]}">)
     cal << %(<thead>)
 
+    table_spanning_length = 3
+    table_spanning_length += 1 if options[:show_week_numbers]
+    table_spanning_length += 1 if options[:show_month_name]
+    table_spanning_length += 4 if options[:previous_month_text] or options[:next_month_text]
+
     if (options[:month_header])
       cal << %(<tr>)
       if options[:previous_month_text] or options[:next_month_text]
         cal << %(<th colspan="2">#{options[:previous_month_text]}</th>)
-        colspan = options[:show_week_numbers] ? 4 : 3
-      else
-        colspan = options[:show_week_numbers] ? 8 : 7
       end
+      colspan = table_spanning_length
       cal << %(<th colspan="#{colspan}" class="#{options[:month_name_class]}">#{options[:calendar_title]}</th>)
       cal << %(<th colspan="2">#{options[:next_month_text]}</th>) if options[:next_month_text]
       cal << %(</tr>)
@@ -139,6 +143,8 @@ module CalendarHelper
     cal << %(<tr class="#{options[:day_name_class]}">)
 
     cal << %(<th>#{options[:week_number_title]}</th>) if options[:show_week_numbers]
+
+    cal << %(<th>&nbsp;</th>) if options[:show_month_name]
 
     week_days.each do |wday|
       cal << %(<th id="#{th_id(Date::DAYNAMES[wday], options[:table_id])}" scope="col">)
@@ -151,6 +157,7 @@ module CalendarHelper
     # previous month
     begin_of_week = beginning_of_week(first, first_weekday)
     cal << %(<td class="#{options[:week_number_class]}">#{week_number(begin_of_week, options[:week_number_format])}</td>) if options[:show_week_numbers]
+    cal << %(<td class="#{options[:month_name_class]}">#{begin_of_week.month}</td>) if options[:show_month_name]
 
     # New things added by Alan #################################################
     #
@@ -179,6 +186,7 @@ module CalendarHelper
         if cur != last
           cal << %(<tr>)
           cal << %(<td class="#{options[:week_number_class]}">#{week_number(cur + 1, options[:week_number_format])}</td>) if options[:show_week_numbers]
+          cal << %(<td class="#{options[:month_name_class]}">&nbsp;</td>) if options[:show_month_name]
         end
       end
 
@@ -207,6 +215,7 @@ module CalendarHelper
         if cur != last
           cal << %(<tr>)
           cal << %(<td class="#{options[:week_number_class]}">#{week_number(cur + 1, options[:week_number_format])}</td>) if options[:show_week_numbers]
+          cal << %(<td class="#{options[:month_name_class]}">&nbsp;</td>) if options[:show_month_name]
         end
       end
 
@@ -231,6 +240,7 @@ module CalendarHelper
         if cur != last
           cal << %(<tr>)
           cal << %(<td class="#{options[:week_number_class]}">#{week_number(cur + 1, options[:week_number_format])}</td>) if options[:show_week_numbers]
+          cal << %(<td class="#{options[:month_name_class]}">&nbsp;</td>) if options[:show_month_name]
         end
       end
     end
