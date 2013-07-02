@@ -157,7 +157,7 @@ module CalendarHelper
     # previous month
     begin_of_week = beginning_of_week(first, first_weekday)
     cal << %(<td class="#{options[:week_number_class]}">#{week_number(begin_of_week, options[:week_number_format])}</td>) if options[:show_week_numbers]
-    cal << %(<td class="#{options[:month_name_class]}">#{begin_of_week.month}</td>) if options[:show_month_name]
+    cal << %(<td class="#{options[:month_name_class]}">#{DateTime::MONTHNAMES[begin_of_week.month]}</td>) if options[:show_month_name]
 
     # New things added by Alan #################################################
     #
@@ -192,7 +192,7 @@ module CalendarHelper
 
     end unless Date.today.wday == first_weekday
 
-    cal << %(</tr><tr>)
+    # cal << %(</tr><tr>) Removed as this was breaking up the month.
 
     # This begins the normal calendar view, but was changed to use create
     # attributes instead of dimming them.
@@ -215,7 +215,7 @@ module CalendarHelper
         if cur != last
           cal << %(<tr>)
           cal << %(<td class="#{options[:week_number_class]}">#{week_number(cur + 1, options[:week_number_format])}</td>) if options[:show_week_numbers]
-          cal << %(<td class="#{options[:month_name_class]}">&nbsp;</td>) if options[:show_month_name]
+          cal << %(<td class="#{options[:month_name_class]}">#{DateTime::MONTHNAMES[(cur + 1).month]}</td>) if options[:show_month_name]
         end
       end
 
@@ -240,7 +240,11 @@ module CalendarHelper
         if cur != last
           cal << %(<tr>)
           cal << %(<td class="#{options[:week_number_class]}">#{week_number(cur + 1, options[:week_number_format])}</td>) if options[:show_week_numbers]
-          cal << %(<td class="#{options[:month_name_class]}">&nbsp;</td>) if options[:show_month_name]
+          # If the day of the month is less than 8 (the first or second week) display the month, else add non-breaking space.
+          if options[:show_month_name]
+            month_name_or_nbsp = cur.day < 8 ? DateTime::MONTHNAMES[cur.month] : "&nbsp;"
+            cal << %(<td class="#{options[:month_name_class]}">#{month_name_or_nbsp}</td>)
+          end
         end
       end
     end
