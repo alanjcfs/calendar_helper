@@ -102,7 +102,8 @@ module CalendarHelper
       :week_number_class   => 'weekNumber',
       :week_number_title   => 'CW',
       :week_number_format  => :iso8601, # :iso8601 or :us_canada,
-      :show_other_months   => true
+      :show_other_months   => true,
+      :show_week_days      => true
     }
     options = defaults.merge options
 
@@ -140,10 +141,12 @@ module CalendarHelper
 
     cal << %(<th>#{options[:week_number_title]}</th>) if options[:show_week_numbers]
 
-    week_days.each do |wday|
-      cal << %(<th id="#{th_id(Date::DAYNAMES[wday], options[:table_id])}" scope="col">)
-      cal << (options[:abbrev] ? %(<abbr title="#{day_names[wday]}">#{abbr_day_names[wday]}</abbr>) : day_names[wday])
-      cal << %(</th>)
+    if options[:show_week_days]
+      week_days.each do |wday|
+        cal << %(<th id="#{th_id(Date::DAYNAMES[wday], options[:table_id])}" scope="col">)
+        cal << (options[:abbrev] ? %(<abbr title="#{day_names[wday]}">#{abbr_day_names[wday]}</abbr>) : day_names[wday])
+        cal << %(</th>)
+      end
     end
 
     cal << "</tr></thead><tbody><tr>"
